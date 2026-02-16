@@ -1,0 +1,2911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Vall Store · game shop</title>
+  
+  <!-- Google Fonts: Poppins modern -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <style>
+    /* ========== RESET & VARIABLES ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      max-width: 100%;
+      position: relative;
+      height: 100%;
+    }
+
+    body {
+      background-color: #fafafa;
+      color: #111;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== BLOCKED MESSAGE ========== */
+    .blocked-message {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #ff6b6b 0%, #ff4757 100%);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .blocked-card {
+      background: white;
+      max-width: 400px;
+      width: 100%;
+      border-radius: 40px;
+      padding: 40px 30px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    
+    .blocked-card i {
+      font-size: 5rem;
+      color: #ff4757;
+      margin-bottom: 20px;
+    }
+    
+    .blocked-card h2 {
+      font-size: 2rem;
+      color: #0b1e33;
+      margin-bottom: 15px;
+    }
+    
+    .blocked-card p {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 25px;
+    }
+    
+    .blocked-card button {
+      background: #ff4757;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 15px 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* ========== LOADING SCREEN ========== */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #ffffff 0%, #f2f7ff 100%);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease, visibility 0.6s;
+      opacity: 1;
+      visibility: visible;
+    }
+    .loading-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loading-card {
+      max-width: 90%;
+      width: 400px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 60px;
+      padding: 30px 20px;
+      box-shadow: 0 30px 60px rgba(43,127,255,0.2);
+      border: 2px solid rgba(255,255,255,0.5);
+      text-align: center;
+    }
+
+    .loading-title {
+      font-size: clamp(1.5rem, 6vw, 2.2rem);
+      font-weight: 700;
+      color: #0b1e33;
+      margin-bottom: 15px;
+      letter-spacing: -0.5px;
+    }
+    .loading-title span {
+      color: #2b7fff;
+    }
+
+    .loading-animation {
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .loading-bar-container {
+      width: 100%;
+      height: 20px;
+      background: #e4ecf7;
+      border-radius: 60px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+
+    .loading-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2b7fff, #6ca5ff);
+      border-radius: 60px;
+      transition: width 0.3s ease-out;
+      box-shadow: 0 0 15px #2b7fff;
+    }
+
+    .loading-text {
+      font-size: clamp(1rem, 4vw, 1.6rem);
+      font-weight: 600;
+      color: #0a2540;
+      min-height: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .loading-text i {
+      color: #2b7fff;
+      font-size: clamp(1.2rem, 5vw, 2rem);
+    }
+
+    .loading-percent {
+      font-size: clamp(1.2rem, 5vw, 2rem);
+      font-weight: 700;
+      background: #0b1e33;
+      color: white;
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: 60px;
+      margin-top: 10px;
+    }
+
+    .dot-flash {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #2b7fff;
+      margin: 0 2px;
+      animation: flash 1s infinite alternate;
+    }
+
+    @keyframes flash {
+      0% { opacity: 0.2; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* ========== LAYOUT UTAMA ========== */
+    .app {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 15px;
+      flex: 1;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      color: #8b9eb0;
+      font-size: 0.85rem;
+      width: 100%;
+    }
+
+    /* ========== HEADER & NAVIGASI ========== */
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 0;
+      width: 100%;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #0a2540;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      letter-spacing: -0.5px;
+      color: #0b1e33;
+      white-space: nowrap;
+    }
+    .logo span {
+      color: #2b7fff;
+    }
+
+    .header-right {
+      width: 40px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    #loginIndicator {
+      font-size: 0.9rem;
+      background: #eef4ff;
+      padding: 6px 10px;
+      border-radius: 40px;
+      color: #0b1e33;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #loginIndicator i {
+      color: #2b7fff;
+      font-size: 1rem;
+    }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(3px);
+      z-index: 998;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease;
+    }
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 260px;
+      max-width: 85%;
+      height: 100%;
+      background: white;
+      box-shadow: 4px 0 30px rgba(0,0,0,0.1);
+      z-index: 999;
+      transition: left 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+      padding: 20px 0 0 0;
+      border-top-right-radius: 24px;
+      border-bottom-right-radius: 24px;
+      overflow-y: auto;
+    }
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 15px 20px 15px;
+      border-bottom: 1px solid #eee;
+    }
+    .sidebar-header h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #0b1e33;
+    }
+    .close-sidebar {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: #555;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-profile {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 2px dashed #ccc;
+      margin-bottom: 10px;
+    }
+    
+    .sidebar-profile .profile-icon {
+      font-size: 3rem;
+      color: #2b7fff;
+      margin-bottom: 8px;
+    }
+    
+    .sidebar-profile .profile-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #0b1e33;
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+    
+    .sidebar-profile .profile-email {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+    
+    .sidebar-profile .profile-divider {
+      margin: 10px 0;
+      color: #2b7fff;
+      font-weight: 600;
+      letter-spacing: 1px;
+      font-size: 0.9rem;
+    }
+    
+    .sidebar-profile .profile-badge {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      color: #0b1e33;
+      padding: 4px 8px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      display: inline-block;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 5px 10px;
+    }
+    .sidebar-menu li {
+      margin-bottom: 5px;
+    }
+    .sidebar-menu li a {
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #222;
+      display: block;
+      padding: 10px 15px;
+      border-radius: 12px;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+    .sidebar-menu li a i {
+      width: 24px;
+      margin-right: 8px;
+    }
+
+    /* ========== HOME PROFILE SECTION ========== */
+    .home-profile {
+      background: white;
+      border-radius: 30px;
+      padding: 20px;
+      margin: 15px 0;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+      border: 1px solid #f0f3f8;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+    .profile-image {
+      flex-shrink: 0;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #2b7fff;
+      box-shadow: 0 10px 20px -5px rgba(43,127,255,0.3);
+      background: #eef4ff;
+    }
+    .profile-desc {
+      flex: 1;
+      min-width: 200px;
+    }
+    .profile-desc h3 {
+      font-size: clamp(1.3rem, 5vw, 1.9rem);
+      font-weight: 700;
+      color: #0b1e33;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    .profile-desc p {
+      font-size: clamp(0.9rem, 3vw, 1.2rem);
+      color: #2d3a4f;
+      font-weight: 400;
+      background: #eef4ff;
+      padding: 12px 15px;
+      border-radius: 30px;
+      display: inline-block;
+      width: 100%;
+    }
+
+    /* ========== SEARCH BAR ========== */
+    .search-container {
+      margin: 15px 0 25px 0;
+      width: 100%;
+    }
+    .search-wrapper {
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 60px;
+      padding: 4px 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+      transition: box-shadow 0.2s;
+      width: 100%;
+    }
+    .search-wrapper:focus-within {
+      box-shadow: 0 4px 18px rgba(43, 127, 255, 0.15);
+      border-color: #2b7fff;
+    }
+    .search-wrapper i {
+      color: #8899aa;
+      font-size: 1.1rem;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .search-wrapper input {
+      width: 100%;
+      padding: 12px 0;
+      border: none;
+      outline: none;
+      font-size: 0.95rem;
+      font-weight: 400;
+      background: transparent;
+    }
+
+    /* ========== SECTION TITLE ========== */
+    .section-title {
+      font-size: clamp(1.3rem, 5vw, 1.8rem);
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #0b1e33;
+      display: block;
+    }
+    
+    .btn-add-product {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+      margin-bottom: 15px;
+    }
+    
+    .btn-add-product:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    /* ========== PRODUCT GRID ========== */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+      width: 100%;
+    }
+
+    /* Product Card Styles */
+    .product-card {
+      background: white;
+      border-radius: 24px;
+      padding: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+      border: 1px solid #f0f3f8;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(43,127,255,0.1);
+      border-color: #2b7fff;
+    }
+    
+    .product-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      background: #f8f9fa;
+    }
+    
+    .product-image-placeholder {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(145deg, #e0e7ff 0%, #c7d2fe 100%);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4f46e5;
+      font-size: 3rem;
+    }
+    
+    .product-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #0b1e33;
+    }
+    
+    .product-desc {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 12px;
+      min-height: 40px;
+    }
+    
+    .product-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .product-price {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: #2b7fff;
+    }
+    
+    .btn-order {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 10px 18px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .btn-order:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4);
+    }
+    
+    .dev-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 5px;
+      justify-content: flex-end;
+    }
+    
+    .btn-edit-product, .btn-delete-product {
+      border: none;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-edit-product {
+      background: #f6d365;
+    }
+    
+    .btn-delete-product {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .btn-edit-product:hover, .btn-delete-product:hover {
+      transform: translateY(-2px);
+    }
+
+    /* ========== EMPTY GRID MESSAGE ========== */
+    .empty-grid-message {
+      grid-column: 1 / -1;
+      background: #f8f9fa;
+      border-radius: 24px;
+      padding: 50px 20px;
+      text-align: center;
+      border: 2px dashed #2b7fff;
+      transition: all 0.3s ease;
+    }
+
+    .empty-grid-message i {
+      font-size: 3.5rem;
+      color: #2b7fff;
+      margin-bottom: 15px;
+      opacity: 0.5;
+    }
+
+    .empty-grid-message p {
+      color: #666;
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .empty-grid-message small {
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .empty-grid-message:hover {
+      background: white;
+      border-color: #2b7fff;
+      box-shadow: 0 10px 25px rgba(43,127,255,0.1);
+    }
+
+    .empty-grid-message:hover i {
+      opacity: 0.8;
+    }
+
+    /* ========== DEV PANEL ========== */
+    .dev-panel {
+      background: white;
+      border-radius: 30px;
+      padding: 25px;
+      margin: 30px 0;
+      border: 2px solid #fda085;
+      box-shadow: 0 15px 30px rgba(253, 160, 133, 0.2);
+      width: 100%;
+    }
+    
+    .dev-panel h3 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .dev-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .dev-tab {
+      padding: 10px 20px;
+      background: #f0f4fa;
+      border: none;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+    
+    .dev-tab.active {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      color: white;
+    }
+    
+    .dev-tab:hover {
+      transform: translateY(-2px);
+    }
+    
+    .dev-content {
+      display: none;
+    }
+    
+    .dev-content.active {
+      display: block;
+    }
+    
+    .user-item {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 20px;
+      padding: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 1px solid #ffe4cc;
+    }
+    
+    .user-info {
+      flex: 1;
+    }
+    
+    .user-info strong {
+      font-size: 1rem;
+      color: #0b1e33;
+    }
+    
+    .user-info small {
+      color: #666;
+      font-size: 0.85rem;
+      display: block;
+    }
+    
+    .user-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .btn-block, .btn-unblock, .btn-delete-user {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn-block {
+      background: #ffa502;
+      color: white;
+    }
+    
+    .btn-unblock {
+      background: #2b7fff;
+      color: white;
+    }
+    
+    .btn-delete-user {
+      background: #ff6b6b;
+      color: white;
+    }
+    
+    .btn-block:hover, .btn-unblock:hover, .btn-delete-user:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .blocked-badge {
+      background: #ff6b6b;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      margin-left: 8px;
+    }
+    
+    .dev-badge {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      color: #0b1e33;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 40px;
+      margin-left: 6px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    /* ========== IMAGE PREVIEW ========== */
+    .image-preview {
+      width: 100%;
+      height: 120px;
+      border-radius: 16px;
+      margin-top: 8px;
+      object-fit: cover;
+      border: 2px dashed #2b7fff;
+      display: none;
+    }
+    
+    .image-preview.show {
+      display: block;
+    }
+
+    /* ========== MODALS ========== */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      padding: 15px;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      background: white;
+      max-width: 450px;
+      width: 100%;
+      max-height: 90vh;
+      border-radius: 30px;
+      padding: 25px;
+      box-shadow: 0 40px 60px rgba(0,0,0,0.3);
+      transform: scale(0.95) translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      overflow-y: auto;
+      position: relative;
+      margin: auto;
+    }
+    .modal-overlay.show .modal-card {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-card h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #0b1e33;
+      border-left: 5px solid #2b7fff;
+      padding-left: 12px;
+    }
+
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: #f0f4fa;
+      padding: 4px;
+      border-radius: 60px;
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      border-radius: 60px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+    .auth-tab.active {
+      background: #2b7fff;
+      color: white;
+      box-shadow: 0 4px 10px rgba(43,127,255,0.3);
+    }
+
+    .modal-field {
+      margin-bottom: 15px;
+    }
+    .modal-field label {
+      font-weight: 500;
+      font-size: 0.85rem;
+      color: #4b5563;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .modal-field input, .modal-field textarea, .modal-field select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e7ef;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s;
+      background: #f8fafc;
+    }
+    .modal-field input:focus, .modal-field textarea:focus, .modal-field select:focus {
+      border-color: #2b7fff;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(43,127,255,0.1);
+    }
+    .modal-field textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+    .modal-field small {
+      color: #666;
+      font-size: 0.7rem;
+      margin-top: 4px;
+      display: block;
+    }
+
+    .btn-auth {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 60px;
+      padding: 14px 0;
+      font-weight: 700;
+      font-size: 1rem;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 8px 18px rgba(102, 126, 234, 0.3);
+      margin-top: 10px;
+    }
+    .btn-auth:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+    }
+
+    .btn-pay {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: white;
+      border: none;
+      border-radius: 60px;
+      padding: 14px 0;
+      font-weight: 700;
+      font-size: 1rem;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    .btn-pay:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-top: 12px;
+      width: 100%;
+      text-align: center;
+      cursor: pointer;
+      padding: 8px;
+      transition: color 0.2s;
+    }
+    .close-modal:hover {
+      color: #ff6b6b;
+    }
+
+    /* ========== SOSMED KAMI ========== */
+    .sosmed-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 15px 0;
+    }
+    
+    .sosmed-card {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    
+    .sosmed-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      background: white;
+    }
+    
+    .sosmed-card.tiktok {
+      border-left: 4px solid #000000;
+    }
+    
+    .sosmed-card.tiktok:hover {
+      border-left-width: 6px;
+    }
+    
+    .sosmed-card.whatsapp {
+      border-left: 4px solid #25D366;
+    }
+    
+    .sosmed-card.whatsapp:hover {
+      border-left-width: 6px;
+    }
+    
+    .sosmed-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      background: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    
+    .sosmed-card.tiktok .sosmed-icon i {
+      color: #000000;
+    }
+    
+    .sosmed-card.whatsapp .sosmed-icon i {
+      color: #25D366;
+    }
+    
+    .sosmed-info {
+      flex: 1;
+    }
+    
+    .sosmed-info h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+      color: #0b1e33;
+    }
+    
+    .sosmed-info p {
+      font-size: 0.85rem;
+      color: #666;
+    }
+    
+    .sosmed-action {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #2b7fff;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    
+    .sosmed-action span {
+      background: #eef4ff;
+      padding: 4px 8px;
+      border-radius: 40px;
+      font-size: 0.8rem;
+    }
+    
+    .sosmed-action i {
+      font-size: 1.2rem;
+      transition: transform 0.2s ease;
+    }
+    
+    .sosmed-card:hover .sosmed-action i {
+      transform: translateX(5px);
+    }
+
+    /* ========== STEPS ========== */
+    .steps-container {
+      margin: 20px 0;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 60px;
+    }
+    .step-number {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .step-text {
+      font-size: 0.95rem;
+      color: #1e293b;
+    }
+
+    /* ========== FIX MODAL ORDER ========== */
+    #modalOrderOverlay .modal-card {
+      max-width: 400px;
+      width: calc(100% - 20px);
+      padding: 20px 15px;
+    }
+
+    .receipt-compact {
+      background: #f8f9fa;
+      border-radius: 16px;
+      padding: 12px 10px;
+      margin-bottom: 15px;
+      border: 2px dashed #2b7fff;
+      font-size: 0.8rem;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .receipt-label {
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .receipt-value {
+      font-weight: 600;
+      text-align: right;
+      word-break: break-word;
+      max-width: 60%;
+    }
+
+    .receipt-total {
+      border-top: 1px dashed #ccc;
+      margin-top: 8px;
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+    }
+
+    .receipt-total .receipt-value {
+      color: #2b7fff;
+    }
+
+    /* ========== HIDE ADD PRODUCT BUTTON FOR NON-DEV ========== */
+    .btn-add-product.dev-only {
+      display: none;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+      .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app { padding: 0 10px; }
+      .home-profile { flex-direction: column; text-align: center; }
+      .profile-image { width: 80px; height: 80px; }
+      .product-grid { grid-template-columns: 1fr; }
+      #loginIndicator span { display: none; }
+      #loginIndicator { padding: 8px; border-radius: 50%; }
+      
+      .sosmed-card {
+        padding: 12px 15px;
+      }
+      
+      .sosmed-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+      }
+      
+      .sosmed-info h3 {
+        font-size: 1rem;
+      }
+      
+      .sosmed-info p {
+        font-size: 0.75rem;
+      }
+      
+      .sosmed-action span {
+        display: none;
+      }
+      
+      .empty-grid-message {
+        padding: 30px 15px;
+      }
+      
+      .empty-grid-message i {
+        font-size: 2.5rem;
+      }
+      
+      .empty-grid-message p {
+        font-size: 1rem;
+      }
+      
+      .modal-card {
+        padding: 20px 15px;
+      }
+      
+      .modal-field {
+        margin-bottom: 12px;
+      }
+      
+      .modal-field input, .modal-field textarea, .modal-field select {
+        padding: 10px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ========== BLOCKED MESSAGE ========== -->
+  <div id="blockedMessage" class="blocked-message" style="display: none;">
+    <div class="blocked-card">
+      <i class="fas fa-ban"></i>
+      <h2>Akses Diblokir</h2>
+      <p id="blockedMessageText">Anda diblokir oleh Admin</p>
+      <button onclick="location.reload()">Coba Lagi</button>
+    </div>
+  </div>
+
+  <!-- ========== LOADING SCREEN ========== -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loading-card">
+      <div class="loading-title"><span>VALL</span> STORE</div>
+      <div class="loading-animation">
+        <div class="loading-bar-container">
+          <div class="loading-bar-fill" id="loadingBarFill"></div>
+        </div>
+        <div class="loading-text" id="loadingText">
+          <i class="fas fa-spinner fa-pulse"></i> Sedang Loading
+        </div>
+        <div class="loading-percent" id="loadingPercent">0%</div>
+      </div>
+      <div>
+        <span class="dot-flash"></span>
+        <span class="dot-flash" style="animation-delay: 0.2s;"></span>
+        <span class="dot-flash" style="animation-delay: 0.4s;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP ========== -->
+  <div class="app" id="mainApp">
+    <!-- Header -->
+    <div class="header-row">
+      <button class="menu-btn" id="menuToggle" aria-label="menu">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="logo">VALL <span>STORE</span></div>
+      <div class="header-right">
+        <div id="loginIndicator">
+          <i class="fas fa-user-circle"></i>
+          <span id="loginIndicatorText">Menu</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Home Profile -->
+    <div class="home-profile" id="homeProfileSection">
+      <img src="https://files.catbox.moe/8neuzn.jpg" alt="Vall Store Profile" class="profile-image" onerror="this.src='https://via.placeholder.com/100x100?text=VALL'">
+      <div class="profile-desc">
+        <h3><i class="fas fa-store"></i> Vall Store</h3>
+        <p><i class="fas fa-gamepad"></i> Vall Store melayani berbagai kebutuhan Roblox seperti Akun, Roblox, Buah, Joki, Dll <i class="fas fa-rocket"></i></p>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-container">
+      <div class="search-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Cari produk..." autocomplete="off">
+      </div>
+    </div>
+
+    <!-- ===== PRODUK YANG KAMI SEDIAKAN ===== -->
+    <div class="section-title">
+      📦 PRODUK YANG KAMI SEDIAKAN
+    </div>
+    <button class="btn-add-product" id="btnAddProduct1">
+      <i class="fas fa-plus"></i> Tambah Produk
+    </button>
+    <div class="product-grid" id="productGrid1">
+      <div class="empty-grid-message">
+        <i class="fas fa-box-open"></i>
+        <p>Belum ada produk tersedia</p>
+        <small>Klik Tambah Produk untuk menambah</small>
+      </div>
+    </div>
+
+    <!-- ===== STOCK AKUN KAMI ===== -->
+    <div class="section-title" style="margin-top: 30px;">
+      📦 STOCK AKUN KAMI
+    </div>
+    <button class="btn-add-product" id="btnAddProduct2">
+      <i class="fas fa-plus"></i> Tambah Produk
+    </button>
+    <div class="product-grid" id="productGrid2">
+      <div class="empty-grid-message" style="border-color: #ffa502;">
+        <i class="fas fa-users" style="color: #ffa502;"></i>
+        <p>Belum ada stock akun tersedia</p>
+        <small>Klik Tambah Produk untuk menambah</small>
+      </div>
+    </div>
+
+    <!-- ===== PRODUK BEST SELLER KAMI ===== -->
+    <div class="section-title" style="margin-top: 30px;">
+      🔥 PRODUK BEST SELLER KAMI
+    </div>
+    <button class="btn-add-product" id="btnAddProduct3">
+      <i class="fas fa-plus"></i> Tambah Produk
+    </button>
+    <div class="product-grid" id="productGrid3">
+      <div class="empty-grid-message" style="border-color: #ff6b6b;">
+        <i class="fas fa-fire" style="color: #ff6b6b;"></i>
+        <p>Belum ada produk best seller</p>
+        <small>Klik Tambah Produk untuk menambah</small>
+      </div>
+    </div>
+
+    <!-- Dev Panel -->
+    <div class="dev-panel" id="devPanel" style="display: none;">
+      <h3><i class="fas fa-crown"></i> Dev Panel</h3>
+      
+      <div class="dev-tabs">
+        <button class="dev-tab active" data-tab="users">👥 Manajemen User</button>
+        <button class="dev-tab" data-tab="products">📦 Manajemen Produk</button>
+        <button class="dev-tab" data-tab="coupons">🎟️ Manajemen Kupon</button>
+      </div>
+      
+      <!-- Users Tab -->
+      <div class="dev-content active" id="devUsersTab">
+        <h4 style="margin-bottom: 15px;">Daftar User</h4>
+        <div id="userList"></div>
+      </div>
+      
+      <!-- Products Tab -->
+      <div class="dev-content" id="devProductsTab">
+        <h4 style="margin-bottom: 15px;">Daftar Produk</h4>
+        <div id="productList"></div>
+      </div>
+      
+      <!-- Coupons Tab -->
+      <div class="dev-content" id="devCouponsTab">
+        <h4 style="margin-bottom: 15px;">Daftar Kupon</h4>
+        <div id="couponList"></div>
+        <button class="btn-auth" id="btnAddCoupon" style="margin-top: 15px;" onclick="alert('Fitur tambah kupon akan segera hadir!')">
+          <i class="fas fa-plus"></i> Buat Kupon Baru
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== SIDEBAR ========== -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Vall Store</h2>
+      <button class="close-sidebar" id="closeSidebarBtn"><i class="fas fa-times"></i></button>
+    </div>
+    
+    <!-- Profile info di sidebar -->
+    <div class="sidebar-profile" id="sidebarProfile">
+      <div class="profile-icon">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="profile-name" id="sidebarProfileName">Belum Login</div>
+      <div class="profile-email" id="sidebarProfileEmail">-</div>
+      <div class="profile-divider">------------------</div>
+      <div class="profile-badge" id="sidebarProfileBadge" style="display: none;">Dev Account</div>
+    </div>
+    
+    <ul class="sidebar-menu">
+      <li><a id="menuHome"><i class="fas fa-home"></i> Home</a></li>
+      <li><a id="menuProduk"><i class="fas fa-box"></i> Produk</a></li>
+      <li><a id="menuCaraOrder"><i class="fas fa-shopping-cart"></i> Cara Order</a></li>
+      <li><a id="menuSosmed"><i class="fas fa-share-alt"></i> Sosmed Kami</a></li>
+      <li><a id="menuLogin"><i class="fas fa-sign-in-alt"></i> Login / Register</a></li>
+      <li><a id="menuLogout" style="color: #ff6b6b; display: none;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- ========== MODAL AUTH ========== -->
+  <div class="modal-overlay" id="modalAuthOverlay">
+    <div class="modal-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin">Masuk</button>
+        <button class="auth-tab" id="tabRegister">Daftar</button>
+      </div>
+
+      <div id="loginForm">
+        <h2>🔐 Selamat Datang Kembali</h2>
+        <div class="modal-field">
+          <label>Email atau Username</label>
+          <input type="text" id="loginIdentifier" placeholder="Masukkan email atau username" autocomplete="off">
+        </div>
+        <div class="modal-field">
+          <label>Password</label>
+          <input type="password" id="loginPassword" placeholder="Masukkan password" autocomplete="off">
+        </div>
+        <button class="btn-auth" id="btnLogin"><i class="fas fa-sign-in-alt"></i> Masuk</button>
+      </div>
+
+      <div id="registerForm" style="display: none;">
+        <h2>📝 Buat Akun Baru</h2>
+        <div class="modal-field">
+          <label>Username</label>
+          <input type="text" id="regUsername" placeholder="Pilih username" autocomplete="off">
+        </div>
+        <div class="modal-field">
+          <label>Email</label>
+          <input type="email" id="regEmail" placeholder="email@domain.com" autocomplete="off">
+        </div>
+        <div class="modal-field">
+          <label>Password</label>
+          <input type="password" id="regPassword" placeholder="Minimal 8 karakter" autocomplete="off">
+          <small>Gunakan kombinasi huruf dan angka untuk keamanan</small>
+        </div>
+        <div class="modal-field">
+          <label>Konfirmasi Password</label>
+          <input type="password" id="regConfirmPassword" placeholder="Masukkan ulang password" autocomplete="off">
+        </div>
+        <button class="btn-auth" id="btnRegister"><i class="fas fa-user-plus"></i> Daftar</button>
+      </div>
+      
+      <button class="close-modal" id="tutupAuthModal">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL PRODUCT (TAMBAH / EDIT PRODUK) ========== -->
+  <div class="modal-overlay" id="modalProductOverlay">
+    <div class="modal-card">
+      <h2 id="productModalTitle">📦 Tambah Produk</h2>
+      
+      <div class="modal-field">
+        <label>Nama Produk <span style="color: #ff6b6b;">*</span></label>
+        <input type="text" id="productName" placeholder="Contoh: Joki Rank Aman" maxlength="100">
+      </div>
+      
+      <div class="modal-field">
+        <label>Deskripsi <span style="color: #ff6b6b;">*</span></label>
+        <textarea id="productDesc" rows="2" placeholder="Rank aman & cepat, push rank garansi"></textarea>
+      </div>
+      
+      <div class="modal-field">
+        <label>Harga (Rp) <span style="color: #ff6b6b;">*</span></label>
+        <input type="number" id="productPrice" placeholder="25000" min="0">
+      </div>
+      
+      <div class="modal-field">
+        <label>Kategori <span style="color: #ff6b6b;">*</span></label>
+        <select id="productCategory">
+          <option value="1">📦 Produk Yang Kami Sediakan</option>
+          <option value="2">👥 Stock Akun Kami</option>
+          <option value="3">🔥 Best Seller Kami</option>
+        </select>
+      </div>
+      
+      <div class="modal-field">
+        <label>Link Gambar (opsional)</label>
+        <input type="url" id="productImage" placeholder="https://example.com/gambar.jpg" onchange="previewImage(this.value)">
+        <small>Kosongkan jika tidak ingin menampilkan gambar</small>
+        <img class="image-preview" id="imagePreview" src="#" alt="Preview">
+      </div>
+      
+      <div class="modal-field">
+        <label>Nomor WhatsApp Admin</label>
+        <input type="text" id="productWA" placeholder="6287847222882" value="6287847222882">
+        <small>Contoh: 6287847222882 (tanpa + dan spasi)</small>
+      </div>
+      
+      <button class="btn-auth" id="btnSaveProduct"><i class="fas fa-save"></i> Simpan Produk</button>
+      <button class="close-modal" id="tutupProductModal">Batal</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL COUPON ========== -->
+  <div class="modal-overlay" id="modalCouponOverlay">
+    <div class="modal-card">
+      <h2 id="couponModalTitle">🎟️ Buat Kupon Baru</h2>
+      
+      <div class="modal-field">
+        <label>Kode Kupon</label>
+        <input type="text" id="couponCode" placeholder="Contoh: VALL50K" maxlength="20">
+      </div>
+      
+      <div class="modal-field">
+        <label>Jumlah Potongan (Rp)</label>
+        <input type="number" id="couponDiscount" placeholder="5000" min="0">
+      </div>
+      
+      <div class="modal-field">
+        <label>Minimal Belanja (Rp) - 0 = tanpa minimal</label>
+        <input type="number" id="couponMinPurchase" placeholder="0" min="0" value="0">
+      </div>
+      
+      <div class="modal-field">
+        <label>Maksimal Pemakaian</label>
+        <input type="number" id="couponMaxUses" placeholder="100" min="1" value="100">
+      </div>
+      
+      <div class="modal-field">
+        <label>Tanggal Kadaluarsa</label>
+        <input type="date" id="couponExpiresAt">
+      </div>
+      
+      <div class="modal-field">
+        <label style="display: flex; align-items: center; gap: 10px;">
+          <input type="checkbox" id="couponIsActive" checked> Aktif
+        </label>
+      </div>
+      
+      <button class="btn-auth" id="btnSaveCoupon"><i class="fas fa-save"></i> Simpan Kupon</button>
+      <button class="close-modal" id="tutupCouponModal">Batal</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL ORDER ========== -->
+  <div class="modal-overlay" id="modalOrderOverlay">
+    <div class="modal-card">
+      <h2 style="font-size: 1.3rem; margin-bottom: 15px;">📋 Form Pemesanan</h2>
+      
+      <!-- RECEIPT COMPACT -->
+      <div class="receipt-compact">
+        <div class="receipt-row">
+          <span class="receipt-label">No Pesanan:</span>
+          <span class="receipt-value" id="rcNo" style="color: #2b7fff;">#185</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">Produk:</span>
+          <span class="receipt-value" id="rcProduk">-</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">Harga:</span>
+          <span class="receipt-value" id="rcHargaAwal">Rp 0</span>
+        </div>
+        <div class="receipt-row" style="display: none; color: #25D366;" id="diskonRow">
+          <span class="receipt-label">Diskon:</span>
+          <span class="receipt-value" id="rcDiskon">Rp 0</span>
+        </div>
+        <div class="receipt-total">
+          <span>Total:</span>
+          <span class="receipt-value" id="rcTotal">Rp 0</span>
+        </div>
+      </div>
+
+      <!-- INPUT FIELDS -->
+      <div class="modal-field">
+        <label>Nama lengkap <span style="color: #ff6b6b;">*</span></label>
+        <input type="text" id="namaInput" placeholder="Masukkan nama">
+      </div>
+      
+      <div class="modal-field">
+        <label>Username game <span style="color: #ff6b6b;">*</span></label>
+        <input type="text" id="usernameInput" placeholder="Masukkan username">
+      </div>
+
+      <!-- KODE PROMO -->
+      <div style="margin: 10px 0;">
+        <label style="font-size: 0.85rem; font-weight: 500; color: #4b5563; display: block; margin-bottom: 4px;">
+          <i class="fas fa-ticket-alt"></i> Kode Promo
+        </label>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="couponInput" placeholder="Masukkan kode promo" style="flex: 1; padding: 10px 12px; border: 2px solid #e0e7ef; border-radius: 40px; font-size: 0.85rem; outline: none;">
+          <button id="applyCouponBtn" style="background: #f6d365; border: none; border-radius: 40px; padding: 0 15px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">Pakai</button>
+        </div>
+        <small id="couponMessage" style="color: #666; display: block; margin-top: 4px;"></small>
+      </div>
+
+      <!-- BUTTONS -->
+      <button class="btn-pay" id="bayarSekarangBtn">
+        <i class="fab fa-whatsapp"></i> Pesan via WhatsApp
+      </button>
+      <button class="close-modal" id="tutupModalBtn">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL CARA ORDER ========== -->
+  <div class="modal-overlay" id="modalCaraOrderOverlay">
+    <div class="modal-card">
+      <h2>🛒 Cara Membeli</h2>
+      <div class="steps-container">
+        <div class="step-item"><div class="step-number">1</div><div class="step-text">Pilih produk yang kamu inginkan</div></div>
+        <div class="step-item"><div class="step-number">2</div><div class="step-text">Klik Pesan Sekarang</div></div>
+        <div class="step-item"><div class="step-number">3</div><div class="step-text">Isi formulir dengan lengkap</div></div>
+        <div class="step-item"><div class="step-number">4</div><div class="step-text">Masukkan kode promo (jika ada)</div></div>
+        <div class="step-item"><div class="step-number">5</div><div class="step-text">Klik Pesan via WhatsApp</div></div>
+        <div class="step-item"><div class="step-number">6</div><div class="step-text">Tunggu respon admin via WhatsApp</div></div>
+      </div>
+      <button class="close-modal" id="tutupCaraOrderBtn">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ========== MODAL SOSMED ========== -->
+  <div class="modal-overlay" id="modalSosmedOverlay">
+    <div class="modal-card">
+      <h2><i class="fas fa-share-alt"></i> Sosmed Kami</h2>
+      
+      <div class="sosmed-container">
+        <!-- TikTok Card -->
+        <div class="sosmed-card tiktok" id="tiktokCard">
+          <div class="sosmed-icon">
+            <i class="fab fa-tiktok"></i>
+          </div>
+          <div class="sosmed-info">
+            <h3>TikTok</h3>
+            <p>@vall9132</p>
+          </div>
+          <div class="sosmed-action">
+            <span>Kunjungi</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        
+        <!-- WhatsApp Group Card -->
+        <div class="sosmed-card whatsapp" id="waGroupCard">
+          <div class="sosmed-icon">
+            <i class="fab fa-whatsapp"></i>
+          </div>
+          <div class="sosmed-info">
+            <h3>Grup WhatsApp</h3>
+            <p>BLOX FRUIT BY VALL 🔼</p>
+          </div>
+          <div class="sosmed-action">
+            <span>Gabung</span>
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+      </div>
+      
+      <button class="close-modal" id="tutupSosmedModal">Tutup</button>
+    </div>
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>© 2025 Vall Store — game joki termurah</footer>
+
+  <!-- ========== JAVASCRIPT ========== -->
+  <script>
+    (function() {
+      // ===========================================
+      // 1. KONFIGURASI & CONSTANTS
+      // ===========================================
+      const DEV_EMAIL = "vallstoreROBLOXSTORE3201@gmail.com";
+      const DEV_PASSWORD = "DEVNYAGANTENGLOH";
+      const DEFAULT_WA = "6287847222882";
+      const TIKTOK_URL = "https://www.tiktok.com/@vall9132";
+      const WA_GROUP_URL = "https://chat.whatsapp.com/Hb590rFmSmY0oBHq8wN16w?mode=gi_t";
+
+      // ===========================================
+      // 2. UTILITY FUNCTIONS
+      // ===========================================
+      function simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        return 'hash_' + hash + '_' + btoa(str.substring(0, 2));
+      }
+
+      function showBlockedMessage(message) {
+        document.getElementById('mainApp').style.display = 'none';
+        document.getElementById('blockedMessage').style.display = 'flex';
+        document.getElementById('blockedMessageText').innerText = message;
+      }
+
+      // ===========================================
+      // 3. DATA & STATE
+      // ===========================================
+      // Users
+      let users = [];
+      try {
+        const savedUsers = localStorage.getItem('vallstore_users');
+        if (savedUsers) {
+          users = JSON.parse(savedUsers);
+          users = users.map(u => ({
+            ...u,
+            isBlocked: u.isBlocked || false,
+            isDeleted: u.isDeleted || false
+          }));
+        } else {
+          users = [];
+        }
+      } catch (e) {
+        console.error('Error loading users:', e);
+        users = [];
+      }
+
+      // Products - KOSONG (biar user isi sendiri)
+      let products = [];
+      try {
+        const savedProducts = localStorage.getItem('vallstore_products');
+        if (savedProducts) {
+          products = JSON.parse(savedProducts);
+        } else {
+          products = []; // Kosong, biar user nambah sendiri
+          localStorage.setItem('vallstore_products', JSON.stringify(products));
+        }
+      } catch (e) {
+        console.error('Error loading products:', e);
+        products = [];
+      }
+
+      // Coupons
+      let coupons = [];
+      try {
+        const savedCoupons = localStorage.getItem('vallstore_coupons');
+        if (savedCoupons) {
+          coupons = JSON.parse(savedCoupons);
+        } else {
+          coupons = [];
+        }
+      } catch (e) {
+        console.error('Error loading coupons:', e);
+        coupons = [];
+      }
+
+      // Order Counter
+      let orderCounter = 185;
+      try {
+        const savedCounter = localStorage.getItem('vallstore_order_counter');
+        if (savedCounter) {
+          orderCounter = parseInt(savedCounter);
+        } else {
+          localStorage.setItem('vallstore_order_counter', '185');
+        }
+      } catch (e) {
+        console.error('Error loading order counter:', e);
+        orderCounter = 185;
+      }
+
+      // Create Dev Account
+      const createDevAccount = () => {
+        try {
+          const devExists = users.find(u => u.email === DEV_EMAIL);
+          if (!devExists) {
+            const hashedPassword = simpleHash(DEV_PASSWORD);
+            const devUser = {
+              id: Date.now(),
+              username: 'VallStoreDev',
+              email: DEV_EMAIL,
+              passwordHash: hashedPassword,
+              createdAt: new Date().toISOString(),
+              isDev: true,
+              isBlocked: false,
+              isDeleted: false
+            };
+            users.push(devUser);
+            localStorage.setItem('vallstore_users', JSON.stringify(users));
+            console.log('Dev account created');
+          }
+        } catch (error) {
+          console.error('Error creating dev account:', error);
+        }
+      };
+      createDevAccount();
+
+      // Current User
+      let currentUser = null;
+      try {
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+          currentUser = JSON.parse(savedUser);
+          
+          const userData = users.find(u => u.email === currentUser.email);
+          if (userData) {
+            if (userData.isDeleted) {
+              showBlockedMessage('Akun sudah dihapus oleh Admin');
+              currentUser = null;
+              localStorage.removeItem('currentUser');
+            } else if (userData.isBlocked) {
+              showBlockedMessage('Anda diblokir oleh Admin');
+              currentUser = null;
+              localStorage.removeItem('currentUser');
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error loading current user:', e);
+        currentUser = null;
+      }
+
+      // Order State
+      let selectedProduct = { name: '', price: 0, waNumber: DEFAULT_WA };
+      let appliedCoupon = null;
+      let originalPrice = 0;
+
+      // ===========================================
+      // 4. FUNGSI RENDER PRODUK (TANPA GAMBAR DEFAULT)
+      // ===========================================
+      function renderProductsByCategory(categoryId, gridId) {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        
+        const categoryProducts = products.filter(p => p.category === categoryId);
+        
+        if (categoryProducts.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-grid-message">
+              <i class="fas fa-box-open"></i>
+              <p>Belum ada produk tersedia</p>
+              <small>Klik Tambah Produk untuk menambah</small>
+            </div>
+          `;
+          return;
+        }
+        
+        let html = '';
+        categoryProducts.forEach(product => {
+          // Tampilkan gambar HANYA jika image diisi
+          const imageHtml = product.image && product.image.trim() !== '' 
+            ? `<img src="${product.image}" alt="${product.name}" class="product-image" onerror="this.src='https://via.placeholder.com/300x180?text=Error';">`
+            : `<div class="product-image-placeholder"><i class="fas fa-image" style="opacity: 0.5;"></i></div>`;
+          
+          html += `
+            <div class="product-card">
+              ${imageHtml}
+              <div class="product-name">${product.name}</div>
+              <div class="product-desc">${product.description}</div>
+              <div class="product-footer">
+                <span class="product-price">Rp ${product.price.toLocaleString('id-ID')}</span>
+                <button class="btn-order" data-product-id="${product.id}">
+                  <i class="fab fa-whatsapp"></i> Pesan
+                </button>
+              </div>
+              ${currentUser && currentUser.isDev ? `
+              <div class="dev-actions">
+                <button class="btn-edit-product" data-product-id="${product.id}"><i class="fas fa-edit"></i> Edit</button>
+                <button class="btn-delete-product" data-product-id="${product.id}"><i class="fas fa-trash"></i> Hapus</button>
+              </div>
+              ` : ''}
+            </div>
+          `;
+        });
+        
+        grid.innerHTML = html;
+        
+        // Attach event listeners
+        attachOrderButtons();
+        if (currentUser && currentUser.isDev) {
+          attachDevProductButtons();
+        }
+      }
+
+      function attachOrderButtons() {
+        document.querySelectorAll('.btn-order').forEach(btn => {
+          btn.removeEventListener('click', handleOrderClick);
+          btn.addEventListener('click', handleOrderClick);
+        });
+      }
+
+      function handleOrderClick(e) {
+        const btn = e.currentTarget;
+        const productId = btn.dataset.productId;
+        const product = products.find(p => p.id == productId);
+        
+        if (!product) {
+          alert('Produk tidak ditemukan!');
+          return;
+        }
+        
+        // Set selected product
+        selectedProduct = {
+          name: product.name,
+          price: product.price,
+          waNumber: product.waNumber || DEFAULT_WA
+        };
+        
+        originalPrice = product.price;
+        
+        // Update modal receipt
+        document.getElementById('rcNo').innerText = '#' + orderCounter;
+        document.getElementById('rcProduk').innerText = product.name.length > 20 ? product.name.substring(0, 20) + '...' : product.name;
+        document.getElementById('rcHargaAwal').innerText = `Rp ${product.price.toLocaleString('id-ID')}`;
+        document.getElementById('rcTotal').innerText = `Rp ${product.price.toLocaleString('id-ID')}`;
+        
+        // Reset coupon
+        appliedCoupon = null;
+        document.getElementById('diskonRow').style.display = 'none';
+        document.getElementById('couponInput').value = '';
+        document.getElementById('couponMessage').innerText = '';
+        
+        // Show modal
+        document.getElementById('modalOrderOverlay').classList.add('show');
+      }
+
+      function attachDevProductButtons() {
+        // Tombol Edit
+        document.querySelectorAll('.btn-edit-product').forEach(btn => {
+          btn.removeEventListener('click', handleEditClick);
+          btn.addEventListener('click', handleEditClick);
+        });
+        
+        // Tombol Hapus
+        document.querySelectorAll('.btn-delete-product').forEach(btn => {
+          btn.removeEventListener('click', handleDeleteClick);
+          btn.addEventListener('click', handleDeleteClick);
+        });
+      }
+
+      function handleEditClick(e) {
+        if (!currentUser || !currentUser.isDev) {
+          alert('Hanya Dev yang bisa mengedit produk!');
+          return;
+        }
+        
+        const productId = e.currentTarget.dataset.productId;
+        const product = products.find(p => p.id == productId);
+        
+        if (!product) return;
+        
+        // Isi form modal
+        document.getElementById('productModalTitle').innerText = '✏️ Edit Produk';
+        document.getElementById('productName').value = product.name;
+        document.getElementById('productDesc').value = product.description;
+        document.getElementById('productPrice').value = product.price;
+        document.getElementById('productImage').value = product.image || '';
+        document.getElementById('productWA').value = product.waNumber || DEFAULT_WA;
+        document.getElementById('productCategory').value = product.category;
+        
+        // Preview gambar kalau ada
+        const preview = document.getElementById('imagePreview');
+        if (product.image && product.image.trim() !== '') {
+          preview.src = product.image;
+          preview.classList.add('show');
+        } else {
+          preview.classList.remove('show');
+        }
+        
+        // Simpan ID produk yang diedit
+        document.getElementById('btnSaveProduct').dataset.editId = productId;
+        
+        // Buka modal
+        document.getElementById('modalProductOverlay').classList.add('show');
+      }
+
+      function handleDeleteClick(e) {
+        if (!currentUser || !currentUser.isDev) {
+          alert('Hanya Dev yang bisa menghapus produk!');
+          return;
+        }
+        
+        if (!confirm('Yakin ingin menghapus produk ini?')) return;
+        
+        const productId = e.currentTarget.dataset.productId;
+        products = products.filter(p => p.id != productId);
+        localStorage.setItem('vallstore_products', JSON.stringify(products));
+        
+        // Render ulang
+        renderAllProducts();
+        
+        // Render product list di dev panel
+        renderProductList();
+      }
+
+      function renderAllProducts() {
+        renderProductsByCategory(1, 'productGrid1');
+        renderProductsByCategory(2, 'productGrid2');
+        renderProductsByCategory(3, 'productGrid3');
+      }
+
+      // ===========================================
+      // 5. RENDER USER LIST
+      // ===========================================
+      function renderUserList() {
+        const userList = document.getElementById('userList');
+        if (!users || users.length === 0) {
+          userList.innerHTML = '<p style="text-align: center; padding: 20px;">Belum ada user terdaftar</p>';
+          return;
+        }
+        
+        userList.innerHTML = users
+          .filter(u => !u.isDeleted)
+          .map(u => `
+            <div class="user-item">
+              <div class="user-info">
+                <strong>${u.username} ${u.isDev ? '<span class="dev-badge">DEV</span>' : ''}</strong>
+                ${u.isBlocked ? '<span class="blocked-badge">Diblokir</span>' : ''}
+                <small>${u.email}</small>
+              </div>
+              <div class="user-actions">
+                ${u.isDev ? '' : `
+                  ${u.isBlocked ? 
+                    `<button class="btn-unblock" onclick="toggleBlockUser('${u.email}', false)"><i class="fas fa-check"></i> Buka Blokir</button>` :
+                    `<button class="btn-block" onclick="toggleBlockUser('${u.email}', true)"><i class="fas fa-ban"></i> Blokir</button>`
+                  }
+                  <button class="btn-delete-user" onclick="deleteUser('${u.email}')">
+                    <i class="fas fa-trash"></i> Hapus
+                  </button>
+                `}
+              </div>
+            </div>
+          `).join('');
+      }
+
+      // ===========================================
+      // 6. RENDER PRODUCT LIST (UNTUK DEV PANEL)
+      // ===========================================
+      function renderProductList() {
+        const productList = document.getElementById('productList');
+        if (!products || products.length === 0) {
+          productList.innerHTML = '<p style="text-align: center; padding: 20px;">Belum ada produk</p>';
+          return;
+        }
+        
+        const sortedProducts = [...products].sort((a, b) => b.id - a.id);
+        
+        productList.innerHTML = sortedProducts.map(p => {
+          const categoryNames = ['', 'Produk Kami', 'Stock Akun', 'Best Seller'];
+          return `
+            <div class="user-item" style="border-left: 4px solid #2b7fff;">
+              <div class="user-info">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <strong>${p.name}</strong>
+                  <span style="background: #eef4ff; padding: 2px 8px; border-radius: 40px; font-size: 0.7rem;">${categoryNames[p.category]}</span>
+                  <span style="background: #f6d365; padding: 2px 8px; border-radius: 40px; font-size: 0.7rem;">Rp ${p.price.toLocaleString('id-ID')}</span>
+                </div>
+                <small>${p.description.substring(0, 50)}${p.description.length > 50 ? '...' : ''}</small><br>
+                <small>📷 ${p.image ? 'Ada gambar' : 'Tanpa gambar'}</small>
+              </div>
+              <div class="user-actions">
+                <button class="btn-edit-product" onclick="editProductFromPanel(${p.id})">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn-delete-user" onclick="deleteProduct(${p.id})">
+                  <i class="fas fa-trash"></i> Hapus
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ===========================================
+      // 7. RENDER COUPON LIST
+      // ===========================================
+      function renderCouponList() {
+        const couponList = document.getElementById('couponList');
+        if (!coupons || coupons.length === 0) {
+          couponList.innerHTML = '<p style="text-align: center; padding: 20px;">Belum ada kupon</p>';
+          return;
+        }
+        
+        const sortedCoupons = [...coupons].sort((a, b) => b.id - a.id);
+        
+        couponList.innerHTML = sortedCoupons.map(c => {
+          const isExpired = new Date(c.expiresAt) < new Date();
+          const usageLeft = c.maxUses - c.usedCount;
+          
+          return `
+            <div class="user-item" style="border-left: 4px solid ${c.isActive && !isExpired && usageLeft > 0 ? '#25D366' : '#ff6b6b'}">
+              <div class="user-info">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <strong style="font-size: 1.1rem;">${c.code}</strong>
+                  <span style="background: #f6d365; padding: 2px 8px; border-radius: 40px; font-size: 0.7rem;">Rp ${c.discount.toLocaleString('id-ID')}</span>
+                  ${!c.isActive ? '<span class="blocked-badge">Nonaktif</span>' : ''}
+                  ${isExpired ? '<span class="blocked-badge">Kadaluarsa</span>' : ''}
+                  ${usageLeft <= 0 ? '<span class="blocked-badge">Habis</span>' : ''}
+                </div>
+                
+                <div style="margin-top: 5px;">
+                  <small>💰 Minimal: Rp ${c.minPurchase.toLocaleString('id-ID')}</small><br>
+                  <small>📊 Pemakaian: ${c.usedCount}/${c.maxUses} (sisa ${usageLeft})</small><br>
+                  <small>📅 Exp: ${new Date(c.expiresAt).toLocaleDateString('id-ID')}</small><br>
+                  <small>👤 Dibuat oleh: ${c.createdBy}</small>
+                </div>
+              </div>
+              <div class="user-actions">
+                <button class="btn-edit-product" onclick="editCoupon('${c.id}')">
+                  <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn-delete-product" onclick="toggleCouponStatus('${c.id}')">
+                  <i class="fas fa-${c.isActive ? 'ban' : 'check'}"></i> ${c.isActive ? 'Nonaktifkan' : 'Aktifkan'}
+                </button>
+                <button class="btn-delete-user" onclick="deleteCoupon('${c.id}')">
+                  <i class="fas fa-trash"></i> Hapus
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ===========================================
+      // 8. UPDATE SIDEBAR PROFILE
+      // ===========================================
+      function updateSidebarProfile() {
+        const profileName = document.getElementById('sidebarProfileName');
+        const profileEmail = document.getElementById('sidebarProfileEmail');
+        const profileBadge = document.getElementById('sidebarProfileBadge');
+        const loginMenuItem = document.getElementById('menuLogin');
+        const logoutMenuItem = document.getElementById('menuLogout');
+        
+        if (currentUser) {
+          profileName.innerText = currentUser.username;
+          profileEmail.innerText = currentUser.email;
+          
+          if (currentUser.isDev) {
+            profileBadge.style.display = 'inline-block';
+            profileBadge.innerText = 'Dev Account';
+          } else {
+            profileBadge.style.display = 'none';
+          }
+          
+          loginMenuItem.style.display = 'none';
+          logoutMenuItem.style.display = 'block';
+        } else {
+          profileName.innerText = 'Belum Login';
+          profileEmail.innerText = '-';
+          profileBadge.style.display = 'none';
+          
+          loginMenuItem.style.display = 'block';
+          logoutMenuItem.style.display = 'none';
+        }
+      }
+
+      // ===========================================
+      // 9. UPDATE TOMBOL TAMBAH PRODUK (KHUSUS DEV)
+      // ===========================================
+      function updateAddProductButtons() {
+        const addProductBtns = document.querySelectorAll('.btn-add-product');
+        
+        addProductBtns.forEach(btn => {
+          if (currentUser && currentUser.isDev) {
+            btn.style.display = 'inline-flex';
+          } else {
+            btn.style.display = 'none';
+          }
+        });
+      }
+
+      // ===========================================
+      // 10. UPDATE DEV PANEL
+      // ===========================================
+      function updateDevPanel() {
+        if (currentUser && currentUser.isDev) {
+          document.getElementById('devPanel').style.display = 'block';
+          renderUserList();
+          renderProductList();
+          renderCouponList();
+        } else {
+          document.getElementById('devPanel').style.display = 'none';
+        }
+      }
+
+      // ===========================================
+      // 11. UPDATE UI
+      // ===========================================
+      function updateUI() {
+        renderAllProducts();
+        updateSidebarProfile();
+        updateAddProductButtons(); // Tampilkan/sembunyikan tombol tambah produk
+        updateDevPanel();
+      }
+
+      // ===========================================
+      // 12. COUPON FUNCTIONS
+      // ===========================================
+      function validateAndApplyCoupon(code) {
+        const couponMessage = document.getElementById('couponMessage');
+        const diskonRow = document.getElementById('diskonRow');
+        const rcDiskon = document.getElementById('rcDiskon');
+        const rcTotal = document.getElementById('rcTotal');
+        const rcHargaAwal = document.getElementById('rcHargaAwal');
+        
+        couponMessage.style.color = '#666';
+        
+        if (!code || code.trim() === '') {
+          couponMessage.innerText = '';
+          appliedCoupon = null;
+          diskonRow.style.display = 'none';
+          rcTotal.innerText = rcHargaAwal.innerText;
+          return false;
+        }
+        
+        const coupon = coupons.find(c => 
+          c.code.toUpperCase() === code.trim().toUpperCase() && 
+          c.isActive === true
+        );
+        
+        if (!coupon) {
+          couponMessage.innerText = '❌ Kode promo tidak ditemukan!';
+          couponMessage.style.color = '#ff6b6b';
+          appliedCoupon = null;
+          diskonRow.style.display = 'none';
+          rcTotal.innerText = rcHargaAwal.innerText;
+          return false;
+        }
+        
+        if (new Date(coupon.expiresAt) < new Date()) {
+          couponMessage.innerText = '❌ Kode promo sudah kadaluarsa!';
+          couponMessage.style.color = '#ff6b6b';
+          appliedCoupon = null;
+          diskonRow.style.display = 'none';
+          rcTotal.innerText = rcHargaAwal.innerText;
+          return false;
+        }
+        
+        if (coupon.usedCount >= coupon.maxUses) {
+          couponMessage.innerText = '❌ Kode promo sudah habis masa berlakunya!';
+          couponMessage.style.color = '#ff6b6b';
+          appliedCoupon = null;
+          diskonRow.style.display = 'none';
+          rcTotal.innerText = rcHargaAwal.innerText;
+          return false;
+        }
+        
+        if (originalPrice < coupon.minPurchase) {
+          couponMessage.innerText = `❌ Minimal belanja Rp ${coupon.minPurchase.toLocaleString('id-ID')}`;
+          couponMessage.style.color = '#ff6b6b';
+          appliedCoupon = null;
+          diskonRow.style.display = 'none';
+          rcTotal.innerText = rcHargaAwal.innerText;
+          return false;
+        }
+        
+        const diskon = coupon.discount;
+        const totalAfterDiskon = Math.max(0, originalPrice - diskon);
+        
+        appliedCoupon = coupon;
+        diskonRow.style.display = 'flex';
+        rcDiskon.innerText = `Rp ${diskon.toLocaleString('id-ID')}`;
+        rcTotal.innerText = `Rp ${totalAfterDiskon.toLocaleString('id-ID')}`;
+        
+        couponMessage.innerHTML = `✅ Kode berhasil! Potongan Rp ${diskon.toLocaleString('id-ID')}`;
+        couponMessage.style.color = '#25D366';
+        
+        return true;
+      }
+
+      // ===========================================
+      // 13. GLOBAL FUNCTIONS (untuk onclick)
+      // ===========================================
+      window.toggleBlockUser = function(email, block) {
+        const userIndex = users.findIndex(u => u.email === email);
+        if (userIndex !== -1) {
+          users[userIndex].isBlocked = block;
+          localStorage.setItem('vallstore_users', JSON.stringify(users));
+          
+          if (currentUser && currentUser.email === email && block) {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showBlockedMessage('Anda diblokir oleh Admin');
+            updateUI();
+          }
+          
+          renderUserList();
+        }
+      };
+
+      window.deleteUser = function(email) {
+        if (!confirm('Yakin ingin menghapus user ini?')) return;
+        
+        const userIndex = users.findIndex(u => u.email === email);
+        if (userIndex !== -1) {
+          users[userIndex].isDeleted = true;
+          localStorage.setItem('vallstore_users', JSON.stringify(users));
+          
+          if (currentUser && currentUser.email === email) {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showBlockedMessage('Akun sudah dihapus oleh Admin');
+            updateUI();
+          }
+          
+          renderUserList();
+        }
+      };
+
+      window.previewImage = function(url) {
+        const preview = document.getElementById('imagePreview');
+        if (url && url.trim() !== '') {
+          preview.src = url;
+          preview.classList.add('show');
+        } else {
+          preview.classList.remove('show');
+        }
+      };
+
+      window.editProductFromPanel = function(productId) {
+        if (!currentUser || !currentUser.isDev) {
+          alert('Hanya Dev yang bisa mengedit produk!');
+          return;
+        }
+        
+        const product = products.find(p => p.id == productId);
+        if (!product) return;
+        
+        document.getElementById('productModalTitle').innerText = '✏️ Edit Produk';
+        document.getElementById('productName').value = product.name;
+        document.getElementById('productDesc').value = product.description;
+        document.getElementById('productPrice').value = product.price;
+        document.getElementById('productImage').value = product.image || '';
+        document.getElementById('productWA').value = product.waNumber || DEFAULT_WA;
+        document.getElementById('productCategory').value = product.category;
+        
+        const preview = document.getElementById('imagePreview');
+        if (product.image && product.image.trim() !== '') {
+          preview.src = product.image;
+          preview.classList.add('show');
+        } else {
+          preview.classList.remove('show');
+        }
+        
+        document.getElementById('btnSaveProduct').dataset.editId = productId;
+        document.getElementById('modalProductOverlay').classList.add('show');
+      };
+
+      window.deleteProduct = function(productId) {
+        if (!currentUser || !currentUser.isDev) {
+          alert('Hanya Dev yang bisa menghapus produk!');
+          return;
+        }
+        
+        if (!confirm('Yakin ingin menghapus produk ini?')) return;
+        products = products.filter(p => p.id != productId);
+        localStorage.setItem('vallstore_products', JSON.stringify(products));
+        renderAllProducts();
+        renderProductList();
+      };
+
+      window.editCoupon = function(couponId) {
+        const coupon = coupons.find(c => c.id == couponId);
+        if (coupon) {
+          document.getElementById('couponModalTitle').innerText = '✏️ Edit Kupon';
+          document.getElementById('couponCode').value = coupon.code;
+          document.getElementById('couponDiscount').value = coupon.discount;
+          document.getElementById('couponMinPurchase').value = coupon.minPurchase;
+          document.getElementById('couponMaxUses').value = coupon.maxUses;
+          document.getElementById('couponExpiresAt').value = coupon.expiresAt;
+          document.getElementById('couponIsActive').checked = coupon.isActive;
+          document.getElementById('btnSaveCoupon').dataset.couponId = couponId;
+          document.getElementById('modalCouponOverlay').classList.add('show');
+        }
+      };
+
+      window.toggleCouponStatus = function(couponId) {
+        const index = coupons.findIndex(c => c.id == couponId);
+        if (index !== -1) {
+          coupons[index].isActive = !coupons[index].isActive;
+          localStorage.setItem('vallstore_coupons', JSON.stringify(coupons));
+          renderCouponList();
+        }
+      };
+
+      window.deleteCoupon = function(couponId) {
+        if (!confirm('Yakin ingin menghapus kupon ini?')) return;
+        coupons = coupons.filter(c => c.id != couponId);
+        localStorage.setItem('vallstore_coupons', JSON.stringify(coupons));
+        renderCouponList();
+      };
+
+      // ===========================================
+      // 14. SETUP TOMBOL TAMBAH PRODUK
+      // ===========================================
+      function setupAddProductButtons() {
+        const addProductBtns = document.querySelectorAll('.btn-add-product');
+        
+        addProductBtns.forEach((btn, index) => {
+          btn.onclick = function(e) {
+            e.preventDefault();
+            
+            // Cek apakah user login dan isDev
+            if (!currentUser || !currentUser.isDev) {
+              alert('🔒 Fitur ini hanya untuk Dev! Login dengan akun Dev terlebih dahulu.\n\nEmail: ' + DEV_EMAIL + '\nPassword: ' + DEV_PASSWORD);
+              return;
+            }
+            
+            // Reset form
+            document.getElementById('productModalTitle').innerText = '➕ Tambah Produk Baru';
+            document.getElementById('productName').value = '';
+            document.getElementById('productDesc').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productImage').value = '';
+            document.getElementById('productWA').value = DEFAULT_WA;
+            
+            // Set kategori berdasarkan tombol yang diklik
+            // btnAddProduct1 = kategori 1, btnAddProduct2 = kategori 2, btnAddProduct3 = kategori 3
+            const categoryValue = index + 1;
+            document.getElementById('productCategory').value = categoryValue;
+            
+            document.getElementById('imagePreview').classList.remove('show');
+            document.getElementById('btnSaveProduct').dataset.editId = ''; // Hapus ID edit
+            
+            // Buka modal
+            document.getElementById('modalProductOverlay').classList.add('show');
+          };
+        });
+      }
+
+      // ===========================================
+      // 15. SETUP SAVE PRODUCT BUTTON
+      // ===========================================
+      function setupSaveProductButton() {
+        const btnSave = document.getElementById('btnSaveProduct');
+        if (!btnSave) return;
+        
+        btnSave.addEventListener('click', function() {
+          // Cek login & dev
+          if (!currentUser || !currentUser.isDev) {
+            alert('Hanya Dev yang bisa menambah produk!');
+            return;
+          }
+          
+          // Ambil data dari form
+          const name = document.getElementById('productName').value.trim();
+          const desc = document.getElementById('productDesc').value.trim();
+          const price = parseInt(document.getElementById('productPrice').value);
+          const image = document.getElementById('productImage').value.trim();
+          const wa = document.getElementById('productWA').value.trim() || DEFAULT_WA;
+          const category = parseInt(document.getElementById('productCategory').value);
+          const editId = this.dataset.editId;
+          
+          // Validasi
+          if (!name || !desc || !price || price <= 0) {
+            alert('Nama, deskripsi, dan harga harus diisi dengan benar!');
+            return;
+          }
+          
+          if (editId) {
+            // MODE EDIT
+            const index = products.findIndex(p => p.id == editId);
+            if (index !== -1) {
+              products[index] = {
+                ...products[index],
+                name: name,
+                description: desc,
+                price: price,
+                image: image || '', // Kalau kosong, simpan string kosong
+                waNumber: wa,
+                category: category
+              };
+              alert('✅ Produk berhasil diupdate!');
+            }
+          } else {
+            // MODE TAMBAH BARU
+            const newProduct = {
+              id: Date.now(),
+              name: name,
+              description: desc,
+              price: price,
+              image: image || '', // String kosong kalau gak ada gambar
+              category: category,
+              waNumber: wa
+            };
+            
+            products.push(newProduct);
+            alert('✅ Produk berhasil ditambahkan!');
+          }
+          
+          // Simpan ke localStorage
+          localStorage.setItem('vallstore_products', JSON.stringify(products));
+          
+          // Render ulang
+          renderAllProducts();
+          renderProductList();
+          
+          // Tutup modal
+          document.getElementById('modalProductOverlay').classList.remove('show');
+        });
+      }
+
+      // ===========================================
+      // 16. SETUP APPLY COUPON BUTTON
+      // ===========================================
+      function setupApplyCouponButton() {
+        const applyBtn = document.getElementById('applyCouponBtn');
+        if (!applyBtn) return;
+        
+        applyBtn.addEventListener('click', function() {
+          const code = document.getElementById('couponInput').value;
+          validateAndApplyCoupon(code);
+        });
+      }
+
+      // ===========================================
+      // 17. SETUP BAYAR SEKARANG BUTTON
+      // ===========================================
+      function setupBayarSekarangButton() {
+        const bayarBtn = document.getElementById('bayarSekarangBtn');
+        if (!bayarBtn) return;
+        
+        bayarBtn.addEventListener('click', function() {
+          const nama = document.getElementById('namaInput').value.trim();
+          const username = document.getElementById('usernameInput').value.trim();
+          
+          if (!nama || !username) {
+            alert('❌ Nama dan username game harus diisi!');
+            return;
+          }
+          
+          // Dapatkan total harga
+          let totalHarga = originalPrice;
+          if (appliedCoupon) {
+            totalHarga = Math.max(0, originalPrice - appliedCoupon.discount);
+          }
+          
+          // Format nomor WA
+          let waNumber = selectedProduct.waNumber || DEFAULT_WA;
+          if (!waNumber.startsWith('62')) {
+            if (waNumber.startsWith('0')) {
+              waNumber = '62' + waNumber.substring(1);
+            } else if (!waNumber.startsWith('+')) {
+              waNumber = '62' + waNumber;
+            }
+          }
+          waNumber = waNumber.replace(/[^0-9]/g, '');
+          
+          // Buat pesan WhatsApp
+          const noPesanan = document.getElementById('rcNo').innerText;
+          const namaProduk = selectedProduct.name;
+          const diskonText = appliedCoupon ? `\n💰 Diskon: Rp ${appliedCoupon.discount.toLocaleString('id-ID')} (Kode: ${appliedCoupon.code})` : '';
+          
+          const message = `Halo Kak, saya mau order:
+
+📋 *No. Pesanan:* ${noPesanan}
+👤 *Nama:* ${nama}
+🎮 *Username Game:* ${username}
+📦 *Produk:* ${namaProduk}
+💵 *Harga Awal:* Rp ${originalPrice.toLocaleString('id-ID')}${diskonText}
+💎 *Total Bayar:* Rp ${totalHarga.toLocaleString('id-ID')}
+
+Mohon diproses ya kak, terima kasih! 🙏`;
+          
+          // Buka WhatsApp
+          const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`;
+          window.open(waUrl, '_blank');
+          
+          // Increment order counter
+          orderCounter++;
+          localStorage.setItem('vallstore_order_counter', orderCounter.toString());
+          
+          // Update used count coupon jika ada
+          if (appliedCoupon) {
+            const couponIndex = coupons.findIndex(c => c.id === appliedCoupon.id);
+            if (couponIndex !== -1) {
+              coupons[couponIndex].usedCount++;
+              localStorage.setItem('vallstore_coupons', JSON.stringify(coupons));
+            }
+          }
+          
+          // Tutup modal
+          document.getElementById('modalOrderOverlay').classList.remove('show');
+        });
+      }
+
+      // ===========================================
+      // 18. EVENT HANDLERS
+      // ===========================================
+      document.addEventListener('DOMContentLoaded', function() {
+        // Loading Animation
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loadingBarFill = document.getElementById('loadingBarFill');
+        const loadingText = document.getElementById('loadingText');
+        const loadingPercent = document.getElementById('loadingPercent');
+        
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += 2;
+          loadingBarFill.style.width = progress + '%';
+          loadingPercent.innerText = progress + '%';
+          
+          if (progress >= 50 && progress < 100) {
+            loadingText.innerHTML = '<i class="fas fa-hourglass-half"></i> Loading Hampir Selesai';
+          } else if (progress >= 100) {
+            loadingText.innerHTML = '<i class="fas fa-check-circle"></i> Loading Selesai!';
+            loadingPercent.innerText = '100%';
+            clearInterval(interval);
+            setTimeout(() => {
+              loadingScreen.classList.add('hidden');
+            }, 500);
+          }
+        }, 15);
+
+        // Sidebar
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+        function openSidebar() {
+          sidebar.classList.add('open');
+          overlay.classList.add('active');
+        }
+
+        function closeSidebar() {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('active');
+        }
+
+        menuToggle.addEventListener('click', openSidebar);
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+        overlay.addEventListener('click', closeSidebar);
+
+        // Menu items
+        document.getElementById('menuHome').addEventListener('click', function(e) {
+          e.preventDefault();
+          closeSidebar();
+          document.getElementById('homeProfileSection').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('menuProduk').addEventListener('click', function(e) {
+          e.preventDefault();
+          closeSidebar();
+          document.querySelector('.section-title').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('menuCaraOrder').addEventListener('click', function(e) {
+          e.preventDefault();
+          closeSidebar();
+          document.getElementById('modalCaraOrderOverlay').classList.add('show');
+        });
+
+        document.getElementById('menuSosmed').addEventListener('click', function(e) {
+          e.preventDefault();
+          closeSidebar();
+          document.getElementById('modalSosmedOverlay').classList.add('show');
+        });
+
+        document.getElementById('menuLogin').addEventListener('click', function(e) {
+          e.preventDefault();
+          closeSidebar();
+          document.getElementById('modalAuthOverlay').classList.add('show');
+        });
+
+        document.getElementById('loginIndicator').addEventListener('click', function() {
+          if (!currentUser) {
+            document.getElementById('modalAuthOverlay').classList.add('show');
+          } else {
+            openSidebar();
+          }
+        });
+
+        // Auth Tabs
+        document.getElementById('tabLogin').addEventListener('click', function() {
+          document.getElementById('tabLogin').classList.add('active');
+          document.getElementById('tabRegister').classList.remove('active');
+          document.getElementById('loginForm').style.display = 'block';
+          document.getElementById('registerForm').style.display = 'none';
+        });
+
+        document.getElementById('tabRegister').addEventListener('click', function() {
+          document.getElementById('tabRegister').classList.add('active');
+          document.getElementById('tabLogin').classList.remove('active');
+          document.getElementById('registerForm').style.display = 'block';
+          document.getElementById('loginForm').style.display = 'none';
+        });
+
+        // Register
+        document.getElementById('btnRegister').addEventListener('click', function() {
+          const username = document.getElementById('regUsername').value.trim();
+          const email = document.getElementById('regEmail').value.trim();
+          const password = document.getElementById('regPassword').value;
+          const confirmPass = document.getElementById('regConfirmPassword').value;
+
+          if (!username || !email || !password) {
+            alert('❌ Semua field harus diisi!');
+            return;
+          }
+
+          if (password.length < 8) {
+            alert('❌ Password minimal 8 karakter!');
+            return;
+          }
+
+          if (password !== confirmPass) {
+            alert('❌ Password tidak cocok!');
+            return;
+          }
+
+          if (users.find(u => u.username === username && !u.isDeleted)) {
+            alert('❌ Username sudah digunakan!');
+            return;
+          }
+
+          if (users.find(u => u.email === email && !u.isDeleted)) {
+            alert('❌ Email sudah terdaftar!');
+            return;
+          }
+
+          try {
+            const hashedPassword = simpleHash(password);
+            
+            const newUser = {
+              id: Date.now(),
+              username: username,
+              email: email,
+              passwordHash: hashedPassword,
+              createdAt: new Date().toISOString(),
+              isDev: email === DEV_EMAIL,
+              isBlocked: false,
+              isDeleted: false
+            };
+
+            users.push(newUser);
+            localStorage.setItem('vallstore_users', JSON.stringify(users));
+            
+            alert('✅ Registrasi berhasil! Silakan login.');
+            
+            document.getElementById('regUsername').value = '';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regConfirmPassword').value = '';
+            
+            document.getElementById('tabLogin').click();
+          } catch (error) {
+            console.error('Registration error:', error);
+            alert('❌ Gagal registrasi. Coba lagi.');
+          }
+        });
+
+        // Login
+        document.getElementById('btnLogin').addEventListener('click', function() {
+          const identifier = document.getElementById('loginIdentifier').value.trim();
+          const password = document.getElementById('loginPassword').value;
+
+          if (!identifier || !password) {
+            alert('❌ Isi email/username dan password!');
+            return;
+          }
+
+          const user = users.find(u => (u.username === identifier || u.email === identifier) && !u.isDeleted);
+          
+          if (!user) {
+            alert('❌ User tidak ditemukan!');
+            return;
+          }
+          
+          if (user.isBlocked) {
+            showBlockedMessage('Anda diblokir oleh Admin');
+            return;
+          }
+
+          try {
+            const hashedInput = simpleHash(password);
+            
+            if (hashedInput === user.passwordHash) {
+              currentUser = {
+                username: user.username,
+                email: user.email,
+                isDev: user.isDev || false
+              };
+              localStorage.setItem('currentUser', JSON.stringify(currentUser));
+              
+              document.getElementById('modalAuthOverlay').classList.remove('show');
+              document.getElementById('loginIdentifier').value = '';
+              document.getElementById('loginPassword').value = '';
+              
+              updateUI();
+              alert(`✅ Selamat datang ${user.username}!`);
+            } else {
+              alert('❌ Password salah!');
+            }
+          } catch (error) {
+            console.error('Login error:', error);
+            alert('❌ Gagal login. Coba lagi.');
+          }
+        });
+
+        // Logout
+        document.getElementById('menuLogout').addEventListener('click', function(e) {
+          e.preventDefault();
+          currentUser = null;
+          localStorage.removeItem('currentUser');
+          updateUI();
+          closeSidebar();
+          alert('✅ Logout berhasil!');
+        });
+
+        // Close Modals
+        document.getElementById('tutupAuthModal').addEventListener('click', function() {
+          document.getElementById('modalAuthOverlay').classList.remove('show');
+        });
+
+        document.getElementById('tutupProductModal').addEventListener('click', function() {
+          document.getElementById('modalProductOverlay').classList.remove('show');
+        });
+
+        document.getElementById('tutupCouponModal').addEventListener('click', function() {
+          document.getElementById('modalCouponOverlay').classList.remove('show');
+        });
+
+        document.getElementById('tutupModalBtn').addEventListener('click', function() {
+          document.getElementById('modalOrderOverlay').classList.remove('show');
+        });
+
+        document.getElementById('tutupCaraOrderBtn').addEventListener('click', function() {
+          document.getElementById('modalCaraOrderOverlay').classList.remove('show');
+        });
+
+        document.getElementById('tutupSosmedModal').addEventListener('click', function() {
+          document.getElementById('modalSosmedOverlay').classList.remove('show');
+        });
+
+        // Click outside to close modals
+        const modals = [
+          document.getElementById('modalAuthOverlay'),
+          document.getElementById('modalProductOverlay'),
+          document.getElementById('modalCouponOverlay'),
+          document.getElementById('modalOrderOverlay'),
+          document.getElementById('modalCaraOrderOverlay'),
+          document.getElementById('modalSosmedOverlay')
+        ];
+
+        modals.forEach(modal => {
+          modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+              modal.classList.remove('show');
+            }
+          });
+        });
+
+        // Sosmed Cards
+        document.getElementById('tiktokCard').addEventListener('click', function() {
+          window.open(TIKTOK_URL, '_blank');
+        });
+
+        document.getElementById('waGroupCard').addEventListener('click', function() {
+          window.open(WA_GROUP_URL, '_blank');
+        });
+
+        // Dev Tabs
+        document.querySelectorAll('.dev-tab').forEach(tab => {
+          tab.addEventListener('click', function() {
+            document.querySelectorAll('.dev-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.dev-content').forEach(c => c.classList.remove('active'));
+            
+            tab.classList.add('active');
+            const tabName = tab.dataset.tab;
+            const contentId = `dev${tabName.charAt(0).toUpperCase() + tabName.slice(1)}Tab`;
+            document.getElementById(contentId).classList.add('active');
+            
+            if (tabName === 'users') {
+              renderUserList();
+            } else if (tabName === 'products') {
+              renderProductList();
+            } else if (tabName === 'coupons') {
+              renderCouponList();
+            }
+          });
+        });
+
+        // Setup fitur-fitur
+        setupAddProductButtons();
+        setupSaveProductButton();
+        setupApplyCouponButton();
+        setupBayarSekarangButton();
+
+        // Initial Render
+        updateUI();
+      });
+    })();
+  </script>
+</body>
+</html>
